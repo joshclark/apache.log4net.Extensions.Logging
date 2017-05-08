@@ -1,0 +1,42 @@
+<Project>
+  <PropertyGroup>
+    <Product>apache.log4net.Extensions.Logging</Product>
+    <Description>log4net logger provider implementation for Microsoft.Extensions.Logging.</Description>
+    <PackageTags>logging;log4net</PackageTags>
+    <PackageProjectUrl>https://github.com/joshclark/apache.log4net.Extensions.Logging</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/joshclark/apache.log4net.Extensions.Logging/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/joshclark/apache.log4net.Extensions.Logging</RepositoryUrl>
+
+    <Copyright>Copyright © Josh Clark 2017</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Authors>Josh Clark</Authors>
+
+    <CLSCompliant>true</CLSCompliant>
+    <ComVisible>false</ComVisible>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Major>0</Major>
+    <Minor>0</Minor>
+    <Revision>1</Revision>
+
+    <BuildNumber Condition=" '$(APPVEYOR_BUILD_NUMBER)' != '' ">$(APPVEYOR_BUILD_NUMBER)</BuildNumber>
+    <BuildNumber Condition=" '$(BUILD_NUMBER)' != '' ">$(BUILD_NUMBER)</BuildNumber>
+    <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
+
+    <PrereleaseLabel>-develop</PrereleaseLabel>
+    <PrereleaseLabel Condition=" '$(APPVEYOR_BUILD_NUMBER)' != '' "></PrereleaseLabel>
+    <!-- <PrereleaseLabel></PrereleaseLabel> --> <!-- For release versions only -->
+
+    <PrereleaseLabelConstants></PrereleaseLabelConstants>
+    <PrereleaseLabelConstants Condition=" '$(PrereleaseLabel)' == '-develop' ">PRERELEASE_DEVELOP</PrereleaseLabelConstants>
+    <PrereleaseLabelConstants Condition=" '$(APPVEYOR_BUILD_NUMBER)' != '' ">PRERELEASE_NIGHTLY</PrereleaseLabelConstants>
+    <DefineConstants>$(DefineConstants);$(PrereleaseLabelConstants)</DefineConstants>
+
+    <AssemblyVersion>$(Major).$(Minor).$(Revision).$(BuildNumber)</AssemblyVersion>
+    <AssemblyFileVersion>$(Major).$(Minor).$(Revision).$(BuildNumber)</AssemblyFileVersion>
+    <InformationalVersion>$(Major).$(Minor).$(Revision).$(BuildNumber)$(PrereleaseLabel)</InformationalVersion>
+    <PackageVersion>$(Major).$(Minor).$(Revision).$(BuildNumber)$(PrereleaseLabel)</PackageVersion>
+  </PropertyGroup>
+</Project>
