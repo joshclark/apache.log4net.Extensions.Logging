@@ -1,4 +1,4 @@
-# apache.log4net.Extensions.Logging [![Build status](https://ci.appveyor.com/api/projects/status/g0m4gco5t187gvjc?svg=true)](https://ci.appveyor.com/project/joshclark/microsoft-extensions-logging-log4net/history) [![NuGet Version](http://img.shields.io/nuget/v/apache.log4net.Extensions.Logging.svg?style=flat)](https://www.nuget.org/packages/apache.log4net.Extensions.Logging/) 
+# apache.log4net.Extensions.Logging [![Build status](https://ci.appveyor.com/api/projects/status/g0m4gco5t187gvjc?svg=true)](https://ci.appveyor.com/project/joshclark/apache.log4net.Extensions.Logging/history) [![NuGet Version](http://img.shields.io/nuget/v/apache.log4net.Extensions.Logging.svg?style=flat)](https://www.nuget.org/packages/apache.log4net.Extensions.Logging/) 
 
 
 A log4net provider for [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging), the logging subsystem used by ASP.NET Core.
