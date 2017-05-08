@@ -17,6 +17,7 @@ namespace apache.log4net.Extensions.Logging
     internal class Log4NetProvider : ILoggerProvider
     {
         private ILoggerRepository _loggerRepository;
+        private FileWatcher _fileWatcher;
 
         public void Initialize(Log4NetSettings settings)
         {
@@ -30,7 +31,7 @@ namespace apache.log4net.Extensions.Logging
 
             if (File.Exists(configFile))
             {
-                ConfigureRepositoryFromXml(repo, configFile);
+                ConfigureRepositoryFromXml(repo, configFile, settings.Watch);
             }
             else
             {
@@ -40,13 +41,24 @@ namespace apache.log4net.Extensions.Logging
             return repo;
         }
 
-        private void ConfigureRepositoryFromXml(ILoggerRepository repo, string configFile)
+        private void ConfigureRepositoryFromXml(ILoggerRepository repo, string configFile, bool watchConfigFileForChanges)
         {
-            var xDocument = XDocument.Load(configFile);
+            void ConfigureFromFile(string filename)
+            {
+                var xDocument = XDocument.Load(filename);
 
-            ReplaceEnvironmentVariables(xDocument);
+                ReplaceEnvironmentVariables(xDocument);
 
-            XmlConfigurator.Configure(repo, AsXmlElement(xDocument));
+                XmlConfigurator.Configure(repo, AsXmlElement(xDocument));
+            }
+
+            ConfigureFromFile(configFile);
+
+            if (watchConfigFileForChanges)
+            {
+                // We can't just use XmlConfigurator.Configure since we need to modify the file when it changes.
+                _fileWatcher = new FileWatcher(configFile, ConfigureFromFile);
+            }
         }
 
 
@@ -92,6 +104,7 @@ namespace apache.log4net.Extensions.Logging
 
         public void Dispose()
         {
+            _fileWatcher?.Dispose();
         }
 
     }
