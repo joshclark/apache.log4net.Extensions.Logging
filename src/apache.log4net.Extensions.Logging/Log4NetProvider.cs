@@ -16,8 +16,14 @@ namespace apache.log4net.Extensions.Logging
 {
     internal class Log4NetProvider : ILoggerProvider
     {
+        private static readonly LazyConcurrentDictionary<string, ILoggerRepository> _repositoryCache;
         private ILoggerRepository _loggerRepository;
         private FileWatcher _fileWatcher;
+
+        static Log4NetProvider()
+        {
+            _repositoryCache = new LazyConcurrentDictionary<string, ILoggerRepository>(StringComparer.Ordinal);
+        }
 
         public void Initialize(Log4NetSettings settings)
         {
@@ -26,19 +32,24 @@ namespace apache.log4net.Extensions.Logging
 
         private ILoggerRepository CreateRepository(Log4NetSettings settings)
         {
-            var repo = LogManager.CreateRepository(settings.RootRepository);
-            var configFile = Path.GetFullPath(settings.ConfigFile);
-
-            if (File.Exists(configFile))
+            ILoggerRepository CreateAndInitializeRepo(string repoName)
             {
-                ConfigureRepositoryFromXml(repo, configFile, settings.Watch);
-            }
-            else
-            {
-                BasicConfigurator.Configure(repo);
+                var repo = LogManager.CreateRepository(repoName);
+                var configFile = Path.GetFullPath(settings.ConfigFile);
+
+                if (File.Exists(configFile))
+                {
+                    ConfigureRepositoryFromXml(repo, configFile, settings.Watch);
+                }
+                else
+                {
+                    BasicConfigurator.Configure(repo);
+                }
+
+                return repo;
             }
 
-            return repo;
+            return _repositoryCache.GetOrAdd(settings.RootRepository, CreateAndInitializeRepo);
         }
 
         private void ConfigureRepositoryFromXml(ILoggerRepository repo, string configFile, bool watchConfigFileForChanges)
