@@ -2,6 +2,7 @@
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
 using log4net;
@@ -35,7 +36,7 @@ namespace apache.log4net.Extensions.Logging
             ILoggerRepository CreateAndInitializeRepo(string repoName)
             {
                 var repo = LogManager.CreateRepository(repoName);
-                var configFile = Path.GetFullPath(settings.ConfigFile);
+                var configFile = GetConfigFileFullPath(settings.ConfigFile);
 
                 if (File.Exists(configFile))
                 {
@@ -50,6 +51,14 @@ namespace apache.log4net.Extensions.Logging
             }
 
             return _repositoryCache.GetOrAdd(settings.RootRepository, CreateAndInitializeRepo);
+        }
+
+        private static string GetConfigFileFullPath(string filePath)
+        {
+            var assemblyPath = new Uri(typeof(Log4NetProvider).GetTypeInfo().Assembly.CodeBase).LocalPath;
+            var assemblyDir = Path.GetDirectoryName(assemblyPath) ?? String.Empty;
+            var configFile = Path.Combine(assemblyDir, filePath);
+            return Path.GetFullPath(configFile);
         }
 
         private void ConfigureRepositoryFromXml(ILoggerRepository repo, string configFile, bool watchConfigFileForChanges)
