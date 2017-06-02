@@ -25,6 +25,7 @@ namespace SampleWebApp.Controllers
         {
             ViewData["Message"] = "Your application description page.";
             _log.LogWarning("About page is shown");
+            _log.LogTrace("Trace Messages Show Up!");
 
             return View();
         }

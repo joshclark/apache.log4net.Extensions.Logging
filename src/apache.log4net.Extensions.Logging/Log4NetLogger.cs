@@ -1,11 +1,14 @@
 ﻿using log4net;
 using System;
+using log4net.Core;
 using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace apache.log4net.Extensions.Logging
 {
     internal class Log4NetLogger : ILogger
     {
+        private static readonly Type _thisDeclaringType = typeof(Log4NetLogger);
         private readonly ILog _log;
 
         public Log4NetLogger(ILog log)
@@ -23,6 +26,8 @@ namespace apache.log4net.Extensions.Logging
             switch (logLevel)
             {
                 case LogLevel.Trace:
+                    return _log.Logger.IsEnabledFor(Level.Trace);
+
                 case LogLevel.Debug:
                     return _log.IsDebugEnabled;
 
@@ -61,6 +66,9 @@ namespace apache.log4net.Extensions.Logging
             switch (logLevel)
             {
                 case LogLevel.Trace:
+                    _log.Logger.Log(_thisDeclaringType, Level.Trace, message, exception);
+                    break;
+
                 case LogLevel.Debug:
                     _log.Debug(message, exception);
                     break;
