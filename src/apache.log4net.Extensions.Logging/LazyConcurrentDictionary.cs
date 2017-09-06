@@ -21,5 +21,10 @@ namespace apache.log4net.Extensions.Logging
 
             return lazy.Value;
         }
+
+        public void Clear()
+        {
+            _dictionary.Clear();
+        }
     }
 }

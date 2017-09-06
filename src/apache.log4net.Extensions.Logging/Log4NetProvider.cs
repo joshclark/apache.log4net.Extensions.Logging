@@ -17,15 +17,30 @@ namespace apache.log4net.Extensions.Logging
 {
     internal class Log4NetProvider : ILoggerProvider
     {
+        private readonly Func<string, XDocument> _xDocumentProvider;
+        private readonly Func<string, bool> _fileExistsCheck;
         private static readonly LazyConcurrentDictionary<string, ILoggerRepository> _repositoryCache;
+        private static readonly LazyConcurrentDictionary<string, Log4NetLogger> _loggerCache;
         private ILoggerRepository _loggerRepository;
         private FileWatcher _fileWatcher;
 
         static Log4NetProvider()
         {
             _repositoryCache = new LazyConcurrentDictionary<string, ILoggerRepository>(StringComparer.Ordinal);
+            _loggerCache = new LazyConcurrentDictionary<string, Log4NetLogger>(StringComparer.Ordinal);
         }
 
+        public Log4NetProvider()
+            : this(XDocument.Load, File.Exists)
+        {
+        }
+
+        internal Log4NetProvider(Func<string, XDocument> xDocumentProvider, Func<string, bool> fileExistsCheck)
+        {
+            _xDocumentProvider = xDocumentProvider;
+            _fileExistsCheck = fileExistsCheck;
+        }
+       
         public void Initialize(Log4NetSettings settings)
         {
             _loggerRepository = CreateRepository(settings);
@@ -38,7 +53,7 @@ namespace apache.log4net.Extensions.Logging
                 var repo = LogManager.CreateRepository(repoName);
                 var configFile = GetConfigFileFullPath(settings.ConfigFile);
 
-                if (File.Exists(configFile))
+                if (_fileExistsCheck(configFile))
                 {
                     ConfigureRepositoryFromXml(repo, configFile, settings.Watch);
                 }
@@ -65,11 +80,12 @@ namespace apache.log4net.Extensions.Logging
         {
             void ConfigureFromFile(string filename)
             {
-                var xDocument = XDocument.Load(filename);
+                var xDocument = _xDocumentProvider(filename);
 
                 ReplaceEnvironmentVariables(xDocument);
 
                 XmlConfigurator.Configure(repo, AsXmlElement(xDocument));
+                _loggerCache.Clear();
             }
 
             ConfigureFromFile(configFile);
@@ -114,12 +130,15 @@ namespace apache.log4net.Extensions.Logging
             return xmlDoc.DocumentElement;
         }
 
-
         public ILogger CreateLogger(string categoryName)
         {
-            var logger = _loggerRepository.GetLogger(categoryName);
-            var impl = new LogImpl(logger);
-            return new Log4NetLogger(impl);
+            Log4NetLogger CreateLog4NetLogger(string category)
+            {
+                var logger = _loggerRepository.GetLogger(category);
+                var impl = new LogImpl(logger);
+                return new Log4NetLogger(impl);
+            }
+            return _loggerCache.GetOrAdd(categoryName, CreateLog4NetLogger);
         }
 
         public void Dispose()
