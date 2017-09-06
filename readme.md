@@ -13,10 +13,12 @@ This package routes ASP.NET log messages through log4net, so you can get informa
 Install-Package apache.log4net.Extensions.Logging 
 ```
 
+(_Note:_ You should use version 1.x for .NET Core 1.x projects and version 2.x for .NET Core 2.x projects because of [breaking change](https://github.com/aspnet/Announcements/issues/255) in .NET Core logging API introduced in .NET Core 2.0)
+
 **Next**, create a log4net.config in the root of your project, see [log4net.config](https://logging.apache.org/log4net/release/manual/configuration.html) for examples.  You can also use the [config](https://github.com/joshclark/apache.log4net.Extensions.Logging/blob/master/samples/SampleWebApp/log4net.config) included with the sample app  
 
 
-**Finally**, in your `Startup` class's `Configure()` method, remove the existing logger configuration entries and
+**Finally (.NET Core 1.x)**, in your `Startup` class's `Configure()` method, remove the existing logger configuration entries and
 call `AddLog4Net()` on the provided `loggerFactory`.
 
 ```c#
@@ -26,6 +28,16 @@ call `AddLog4Net()` on the provided `loggerFactory`.
                         IApplicationLifetime appLifetime)
   {
       loggerfactory.AddLog4Net();
+      
+```
+
+**Finally (.NET Core 2.x)**, in your `Startup` class's `ConfigureServices()` method, remove the existing logger configuration entries and
+call `AddLog4Net()` on the `ILoggerBuilder` in `AddLogging`.
+
+```c#
+  public IServiceProvider ConfigureServices(IServiceCollection services)
+  {
+      services.AddLogging(builder => builder.AddLog4Net());
       
 ```
 
